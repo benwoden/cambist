@@ -37,6 +37,11 @@ server <- function(input, output, session) {
   current_pos <- reactiveVal(1)
   # Reactive value to track if we're in "closed book" mode
   closed_book <- reactiveVal(FALSE)
+
+  # Disable action buttons until data is loaded
+  disable("reset")
+  disable("nextBtn")
+  disable("closeBook")
   
   # Handle file upload
   observeEvent(input$file, {
@@ -52,7 +57,9 @@ server <- function(input, output, session) {
       text_data(sample(items))  # Randomize on load
       current_pos(1)
       closed_book(FALSE)
+      enable("reset")
       enable("nextBtn")
+      enable("closeBook")
     }
   })
   
@@ -74,6 +81,7 @@ server <- function(input, output, session) {
       current_pos(1)
       closed_book(FALSE)
       enable("nextBtn")
+      enable("closeBook")
     }
   })
   
@@ -96,6 +104,7 @@ server <- function(input, output, session) {
       }
       closed_book(TRUE)
       disable("nextBtn")
+      disable("closeBook")
     }
   })
   
