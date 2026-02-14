@@ -89,8 +89,8 @@ server <- function(input, output, session) {
   
   # Handle close book button
   observeEvent(input$closeBook, {
-    if (!is.null(text_data()) && length(text_data()) > 1) {
-      # Only advance if we're not at the last item
+    if (!is.null(text_data()) && length(text_data()) > 1 && !closed_book()) {
+      # Advance once if possible, then lock into closed book mode
       if (current_pos() < length(text_data())) {
         current_pos(current_pos() + 1)
       }
