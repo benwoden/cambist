@@ -40,13 +40,10 @@ server <- function(input, output, session) {
   
   # Handle file upload
   observeEvent(input$file, {
-    # Read the single line and split it by commas
-    text_content <- readLines(input$file$datapath)
-    items <- unlist(strsplit(text_content, ","))
-    
-    # Clean up the items (remove whitespace)
-    items <- trimws(items)
-    
+    # Read CSV properly — handles quoted fields and multi-row files
+    df <- read.csv(input$file$datapath, header = FALSE, stringsAsFactors = FALSE)
+    items <- trimws(as.character(unlist(df)))
+
     # Remove any empty items
     items <- items[nzchar(items)]
     
