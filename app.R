@@ -37,16 +37,18 @@ server <- function(input, output, session) {
   current_pos <- reactiveVal(1)
   # Reactive value to track if we're in "closed book" mode
   closed_book <- reactiveVal(FALSE)
+
+  # Disable action buttons until data is loaded
+  disable("reset")
+  disable("nextBtn")
+  disable("closeBook")
   
   # Handle file upload
   observeEvent(input$file, {
-    # Read the single line and split it by commas
-    text_content <- readLines(input$file$datapath)
-    items <- unlist(strsplit(text_content, ","))
-    
-    # Clean up the items (remove whitespace)
-    items <- trimws(items)
-    
+    # Read CSV properly — handles quoted fields and multi-row files
+    df <- read.csv(input$file$datapath, header = FALSE, stringsAsFactors = FALSE)
+    items <- trimws(as.character(unlist(df)))
+
     # Remove any empty items
     items <- items[nzchar(items)]
     
@@ -55,7 +57,9 @@ server <- function(input, output, session) {
       text_data(sample(items))  # Randomize on load
       current_pos(1)
       closed_book(FALSE)
+      enable("reset")
       enable("nextBtn")
+      enable("closeBook")
     }
   })
   
@@ -77,6 +81,7 @@ server <- function(input, output, session) {
       current_pos(1)
       closed_book(FALSE)
       enable("nextBtn")
+      enable("closeBook")
     }
   })
   
@@ -92,13 +97,14 @@ server <- function(input, output, session) {
   
   # Handle close book button
   observeEvent(input$closeBook, {
-    if (!is.null(text_data()) && length(text_data()) > 1) {
-      # Only advance if we're not at the last item
+    if (!is.null(text_data()) && length(text_data()) > 0 && !closed_book()) {
+      # Advance once if possible, then lock into closed book mode
       if (current_pos() < length(text_data())) {
         current_pos(current_pos() + 1)
       }
       closed_book(TRUE)
       disable("nextBtn")
+      disable("closeBook")
     }
   })
   
